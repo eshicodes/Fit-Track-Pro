@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack Pro | Professional Light</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --secondary: #6366f1;
+            --bg: #f0f9ff;
+            --glass-card: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        
+        body { 
+            background: radial-gradient(circle at top left, #e0f2fe, #f0f9ff 50%, #eef2ff 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar { 
+            width: 280px; 
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 40px 25px; 
+            height: 100vh; 
+            position: fixed; 
+            z-index: 100;
+        }
+
+        .logo { font-size: 26px; font-weight: 900; color: var(--primary); margin-bottom: 50px; display: flex; align-items: center; gap: 12px; }
+
+        .nav-btn { 
+            width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 18px; 
+            background: transparent; color: var(--text-muted); text-align: left; 
+            cursor: pointer; display: flex; align-items: center; gap: 15px; 
+            font-weight: 700; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .nav-btn.active, .nav-btn:hover { 
+            background: white; 
+            color: var(--primary); 
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.1);
+            transform: translateX(5px);
+        }
+
+        /* Main Content Area */
+        .main { margin-left: 280px; flex: 1; padding: 50px; max-width: 1300px; }
+        .header { margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 34px; font-weight: 800; background: linear-gradient(to right, #0284c7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Professional Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        
+        .stat-card { 
+            background: var(--glass-card);
+            backdrop-filter: blur(12px);
+            padding: 30px; border-radius: 30px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--primary); }
+        .stat-card span { color: var(--text-muted); font-size: 15px; font-weight: 600; display: block; margin-bottom: 8px; }
+        .stat-card h3 { font-size: 38px; font-weight: 800; color: var(--text-dark); }
+
+        /* Floating Box Sections */
+        .box { 
+            background: var(--glass-card); backdrop-filter: blur(15px);
+            padding: 35px; border-radius: 32px; border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04); margin-bottom: 30px;
+        }
+
+        input { 
+            padding: 18px; border-radius: 16px; border: 2px solid #e2e8f0;
+            background: white; color: var(--text-dark); flex: 1; outline: none; 
+            transition: 0.3s; font-weight: 600;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1); }
+
+        /* Upgraded Floating Buttons */
+        .primary-btn { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; padding: 18px 35px; border: none; border-radius: 18px; 
+            cursor: pointer; font-weight: 800; font-size: 16px;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); transition: 0.4s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .primary-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3); }
+
+        /* BMI Analytics Styles */
+        .wheel-box { position: relative; width: 340px; height: 180px; display: flex; flex-direction: column; align-items: center; }
+        .pointer { 
+            width: 5px; height: 100px; background: #334155; position: absolute; 
+            bottom: 40px; left: 50%; transform-origin: bottom center; 
+            transform: translateX(-50%) rotate(-90deg); border-radius: 10px; 
+            transition: 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* List Items Styling */
+        li { 
+            background: white; padding: 20px 25px; border-radius: 22px; 
+            margin-top: 15px; display: flex; justify-content: space-between; 
+            border: 1px solid #f1f5f9; align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+        }
+        .del-btn { 
+            color: #ef4444; cursor: pointer; background: #fee2e2; 
+            padding: 10px 18px; border-radius: 12px; border: none; font-weight: 800; font-size: 13px;
+        }
+
+        /* Animations */
+        .section { display: none; animation: slideUp 0.6s ease; }
+        .section.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="logo"><i data-lucide="activity"></i> FIT PRO</div>
+    <button class="nav-btn active" onclick="show('dash', this)"><i data-lucide="layout-dashboard"></i> Dashboard</button>
+    <button class="nav-btn" onclick="show('workout', this)"><i data-lucide="dumbbell"></i> Workouts</button>
+    <button class="nav-btn" onclick="show('diet', this)"><i data-lucide="apple"></i> Diet Plan</button>
+    <button class="nav-btn" onclick="show('bmi', this)"><i data-lucide="scale"></i> BMI Analytics</button>
+</nav>
+
+<main class="main">
+    <header class="header">
+        <div>
+            <h1 id="page-title">Dashboard</h1>
+            <p style="color: var(--text-muted); font-weight: 600; margin-top: 5px;">Let's track your progress today! 🎯</p>
+        </div>
+        <div style="background: white; padding: 12px 24px; border-radius: 50px; font-weight: 800; color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            ⚡ PRO VERSION
+        </div>
+    </header>
+
+    <div id="dash" class="section active">
+        <div class="stats-grid">
+            <div class="stat-card"><span>Net Calories 🔥</span><h3 id="d-cal">0</h3></div>
+            <div class="stat-card" style="--primary: #6366f1;"><span>Workouts Done 💪</span><h3 id="d-work">0</h3></div>
+            <div class="stat-card" style="--primary: #10b981;"><span>Meals Logged 🥗</span><h3 id="d-meals">0</h3></div>
+        </div>
+        <div class="box">
+            <h3 style="margin-bottom: 25px;">Weekly Activity Chart 📈</h3>
+            <canvas id="fitnessChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <div id="workout" class="section">
+        <div class="box">
+            <h3>Log Your Activity 🏃‍♂️</h3>
+            <div class="input-group" style="display:flex; gap:15px; margin-top:20px;">
+                <input type="text" id="w-name" placeholder="Workout name (e.g. Running, Gym)" oninput="smartFill('work')">
+                <input type="number" id="w-cal" placeholder="Kcal burned">
+                <button class="primary-btn" onclick="addData('work')">Log It 🚀</button>
+            </div>
+        </div>
+        <ul id="work-list"></ul>
+    </div>
+
+    <div id="diet" class="section">
+        <div class="box">
+            <h3>Add Nutrition 🍎</h3>
+            <div class="input-group" style="display:flex; gap:15px; margin-top:20px;">
+                <input type="text" id="m-name" placeholder="Food item (e.g. Rice, Chicken)" oninput="smartFill('meal')">
+                <input type="number" id="m-cal" placeholder="Kcal gained">
+                <button class="primary-btn" onclick="addData('meal')">Add Meal 🍽️</button>
+            </div>
+        </div>
+        <ul id="meal-list"></ul>
+    </div>
+
+    <div id="bmi" class="section">
+        <div class="box">
+            <div style="display: flex; gap: 50px; flex-wrap: wrap; align-items: center; justify-content: center;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>BMI Calculator ⚖️</h3>
+                    <div class="input-group" style="display: flex; flex-direction: column; gap: 18px; margin-top: 25px;">
+                        <input type="number" id="h" placeholder="Height (cm)">
+                        <input type="number" id="w" placeholder="Weight (kg)">
+                        <button class="primary-btn" onclick="calcBMI()">Analyze Now ✨</button>
+                    </div>
+                </div>
+                <div class="wheel-box">
+                    <canvas id="gauge-canvas" width="300" height="150"></canvas>
+                    <div class="pointer" id="pointer"></div>
+                    <div id="bmi-val" style="font-size: 46px; font-weight: 900; margin-top: 15px; color: var(--primary);">--</div>
+                    <div id="bmi-status" style="color: var(--text-muted); font-weight: 800; letter-spacing: 1px; font-size: 14px;">READY TO CHECK</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    lucide.createIcons();
+
+    const lib = {
+        work: { "running": 450, "walking": 150, "gym": 350, "yoga": 120, "cycling": 400, "swimming": 500, "pushups": 50 },
+        meal: { "rice": 210, "egg": 75, "biryani": 650, "chicken": 250, "apple": 95, "dosa": 170, "idli": 65, "milk": 125, "banana": 105 }
+    };
+
+    let stats = JSON.parse(localStorage.getItem('fitProLight')) || { net: 0, wCount: 0, mCount: 0, history: [] };
+
+    function smartFill(type) {
+        const name = document.getElementById(type === 'work' ? 'w-name' : 'm-name').value.toLowerCase();
+        const calInput = document.getElementById(type === 'work' ? 'w-cal' : 'm-cal');
+        if (lib[type][name]) {
+            calInput.value = lib[type][name];
+            calInput.style.borderColor = "#10b981";
+        } else {
+            calInput.style.borderColor = "#e2e8f0";
+        }
+    }
+
+    function addData(type) {
+        const nameEl = document.getElementById(type === 'work' ? 'w-name' : 'm-name');
+        const calEl = document.getElementById(type === 'work' ? 'w-cal' : 'm-cal');
+        
+        if (nameEl.value && calEl.value) {
+            const cal = parseInt(calEl.value);
+            if (type === 'work') { stats.wCount++; stats.net -= cal; }
+            else { stats.mCount++; stats.net += cal; }
+            
+            stats.history.push({ type, name: nameEl.value, cal, id: Date.now() });
+            save();
+            nameEl.value = ''; calEl.value = '';
+            renderLists();
+        }
+    }
+
+    function removeData(id, type, cal) {
+        stats.history = stats.history.filter(item => item.id !== id);
+        if (type === 'work') { stats.wCount--; stats.net += cal; }
+        else { stats.mCount--; stats.net -= cal; }
+        save();
+        renderLists();
+    }
+
+    function save() {
+        localStorage.setItem('fitProLight', JSON.stringify(stats));
+        updateUI();
+    }
+
+    function renderLists() {
+        const wList = document.getElementById('work-list');
+        const mList = document.getElementById('meal-list');
+        wList.innerHTML = ''; mList.innerHTML = '';
+        
+        stats.history.slice().reverse().forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<div><b style="color:var(--text-dark); font-size: 16px;">${item.name.toUpperCase()}</b><br><small style="color:var(--primary); font-weight:700;">${item.cal} kcal</small></div> 
+                            <button class="del-btn" onclick="removeData(${item.id}, '${item.type}', ${item.cal})">DELETE</button>`;
+            if (item.type === 'work') wList.appendChild(li);
+            else mList.appendChild(li);
+        });
+    }
+
+    function updateUI() {
+        document.getElementById('d-cal').innerText = stats.net;
+        document.getElementById('d-work').innerText = stats.wCount;
+        document.getElementById('d-meals').innerText = stats.mCount;
+        drawChart();
+    }
+
+    function initBMI() {
+        const canvas = document.getElementById('gauge-canvas');
+        const ctx = canvas.getContext('2d');
+        const colors = ['#38bdf8', '#10b981', '#fbbf24', '#f87171'];
+        ctx.clearRect(0,0,300,150);
+        colors.forEach((col, i) => {
+            ctx.beginPath();
+            ctx.arc(150, 140, 120, Math.PI + (i * Math.PI/4), Math.PI + ((i+1) * Math.PI/4));
+            ctx.lineWidth = 25; ctx.strokeStyle = col; ctx.lineCap = 'round'; ctx.stroke();
+        });
+    }
+
+    function calcBMI() {
+        const h = document.getElementById('h').value / 100;
+        const w = document.getElementById('w').value;
+        if (h > 0 && w > 0) {
+            const bmi = (w / (h * h)).toFixed(1);
+            document.getElementById('bmi-val').innerText = bmi;
+            
+            let percent = (bmi - 15) / (35 - 15);
+            percent = Math.max(0, Math.min(1, percent));
+            let angle = -90 + (percent * 180);
+            document.getElementById('pointer').style.transform = `translateX(-50%) rotate(${angle}deg)`;
+            
+            const status = document.getElementById('bmi-status');
+            if (bmi < 18.5) { status.innerText = "UNDERWEIGHT 🔵"; status.style.color = "#38bdf8"; }
+            else if (bmi < 25) { status.innerText = "HEALTHY WEIGHT 🟢"; status.style.color = "#10b981"; }
+            else if (bmi < 30) { status.innerText = "OVERWEIGHT 🟡"; status.style.color = "#fbbf24"; }
+            else { status.innerText = "OBESE 🔴"; status.style.color = "#f87171"; }
+        }
+    }
+
+    function show(id, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('page-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+    }
+
+    let myChart;
+    function drawChart() {
+        const ctx = document.getElementById('fitnessChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Net Cal',
+                    data: [stats.net-150, stats.net+100, stats.net-50, stats.net+200, stats.net-100, stats.net+50, stats.net],
+                    borderColor: '#0284c7',
+                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    fill: true, tension: 0.4, borderWidth: 4, pointRadius: 4
+                }]
+            },
+            options: { 
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { border: { display: false }, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } }
+                } 
+            }
+        });
+    }
+
+    window.onload = () => { updateUI(); renderLists(); initBMI(); };
+</script>
+</body>
+</html>
